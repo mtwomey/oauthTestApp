@@ -1,0 +1,25 @@
+{
+  "name": "oauth_authcode",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.18.0",
+    "body-parser": "^1.18.2",
+    "compression": "^1.7.2",
+    "config": "^1.30.0",
+    "dustjs-helpers": "^1.7.4",
+    "dustjs-linkedin": "^2.7.5",
+    "express": "^4.16.3",
+    "express-session": "^1.15.6",
+    "lodash": "^4.17.5",
+    "react": "^16.3.2",
+    "react-dom": "^16.3.2",
+    "require-dir": "^1.0.0"
+  }
+}
