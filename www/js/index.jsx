@@ -87,7 +87,7 @@ class LogWindow extends React.Component {
         };
 
         events.on('log', messageText => {
-            this.addlogs('CLIENT', [messageText]);
+            this.addlogs('CLIENT', [{timestamp: new Date().toLocaleString(), message: messageText}]);
         });
 
         events.on('clearLog', () => {
@@ -101,7 +101,7 @@ class LogWindow extends React.Component {
                         this.addlogs('SERVER', result.data);
                     }
                 });
-        }, 2000);
+        }, 1000);
     }
 
 
@@ -111,8 +111,8 @@ class LogWindow extends React.Component {
 
     addlogs(source, logs) {
         let newContents = this.state.contents;
-        newContents = newContents.concat(logs.map(messageText => {
-            return {id: this.getLogLineId(), source: source, message: messageText};
+        newContents = newContents.concat(logs.map(logEntry => {
+            return {id: this.getLogLineId(), source: source, timestamp: logEntry.timestamp, message: logEntry.message};
         }));
         this.setState({contents: newContents});
     }
@@ -128,6 +128,10 @@ class LogWindow extends React.Component {
     render() {
         let styleSourceTag = {
             color: '#4CAF50'
+        };
+
+        let styleTimestampTag = {
+            color: '#00bcd4'
         };
 
         let styleDiv = {
@@ -154,7 +158,7 @@ class LogWindow extends React.Component {
         };
 
         let logMessages = this.state.contents.map(message => {
-            return <li key={message.id} style={styleListItem}><span style={styleSourceTag}>[{message.source}]</span> {message.message}</li>
+            return <li key={message.id} style={styleListItem}><span style={styleTimestampTag}>[{message.timestamp}]</span> <span style={styleSourceTag}>[{message.source}]</span> {message.message}</li>
         });
 
         return (
@@ -185,6 +189,7 @@ class OauthTargetSelector extends React.Component {
     handleChange(event){
         global.oauthTarget = event.target.value;
         axios.put('/oauth2/target', {oauthTarget: global.oauthTarget});
+        log(`Changing target oauth to ${global.oauthTarget}`);
     }
 
     render() {

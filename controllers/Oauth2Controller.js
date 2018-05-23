@@ -4,7 +4,7 @@ const   config            = require('config'),
 
 function callback(req, res) {
     let oauthTarget = config.get('oauthTargets')[req.session.oauthTarget];
-    let log = (message) => {req.session.logs.push(message);};
+    let log = (message) => {req.session.logs.push({timestamp: new Date().toLocaleString(), message: message});};
     log(`Received callback to: "${req.originalUrl}"`);
     log(`Query details:\n${JSON.stringify(req.query, null, 4)}`);
     log(`Comparing the state values: "${req.session.oauthStateValue}" = "${req.query.state}" ?`);
@@ -54,6 +54,8 @@ function getConfigs(req, res) {
 }
 
 function setOauthTarget(req, res) {
+    let log = (message) => {req.session.logs.push({timestamp: new Date().toLocaleString(), message: message});};
+    log(`Changing target oauth to ${req.body.oauthTarget}`);
     req.session.oauthTarget = req.body.oauthTarget;
     res.sendStatus(200);
 }
