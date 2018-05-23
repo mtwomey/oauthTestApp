@@ -15,7 +15,7 @@ app.use(session({
     resave: false,
     saveUninitialized: true,
     name: 'testCookie',
-    cookie: { maxAge: 60000, httpOnly: false } // Probably want secure: true in production (will only send the cookie back with https connections)
+    cookie: { maxAge: 3600000, httpOnly: false } // Probably want secure: true in production (will only send the cookie back with https connections)
 }));
 
 // Make sure logs and signals array is always there
