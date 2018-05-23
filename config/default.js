@@ -11,7 +11,7 @@ module.exports = {
             state:                       '123',
             clientSecret:                process.env.CLIENT_SECRET_TC_SIMLPE
         },
-        'test-cresidtSuisse': {
+        'test-creditSuisse': {
             oauthEndpoint:               'https://topcoder-dev.auth0.com',
             authorizePath:               '/authorize', // auth0 default
             tokenPath:                   '/oauth/token', // auth0 default

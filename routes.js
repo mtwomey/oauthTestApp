@@ -18,6 +18,8 @@ router.get('/oauth2/callback', controllers.Oauth2Controller.callback);
 
 router.get('/oauth2/configs', controllers.Oauth2Controller.getConfigs);
 
+router.put('/oauth2/target', controllers.Oauth2Controller.setOauthTarget);
+
 // This wildcard get-route goes last - if no other GETs match this one will serve static files
 router.get('/*', controllers.StaticContentController.get);
 

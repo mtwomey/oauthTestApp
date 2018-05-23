@@ -59,6 +59,7 @@ class ClearButton extends React.Component {
         events.emit('clearLog');
         axios.delete('/session');
         deleteAllCookies();
+        axios.put('/oauth2/target', {oauthTarget: global.oauthTarget}); // This has to come after deleteAllCookies
     }
 
     render() {
@@ -183,15 +184,23 @@ class OauthTargetSelector extends React.Component {
 
     handleChange(event){
         global.oauthTarget = event.target.value;
+        axios.put('/oauth2/target', {oauthTarget: global.oauthTarget});
     }
 
     render() {
+        let styleDropdown = {
+            fontSize: '1em',
+            backgroundColor: '#6495ed',
+            color: 'white',
+            margin: '0 10px 10px 0'
+        };
+
         let configOptions = global.oauthTargets.map((config, i) => {
             return <option key={i} value={config}>{config}</option>
         });
 
         return (
-            <select onChange={this.handleChange}>
+            <select onChange={this.handleChange} style={styleDropdown}>
                 {configOptions}
             </select>
         )
@@ -202,7 +211,7 @@ class OauthTest extends React.Component {
     render() {
         return (
             <div>
-                <OauthTargetSelector/><LoginButton/><ClearButton/>
+                <LoginButton/><ClearButton/><OauthTargetSelector/>
                 <LogWindow/>
             </div>
         );
@@ -227,10 +236,17 @@ function getOauthConfigs(){
         })
 }
 
+function setInitialOauthTarget(){
+    return axios.put('/oauth2/target', {oauthTarget: global.oauthTargets[0]})
+}
+
 function preLoadData(){
-    return Promise.all([
+    return Promise.all([ // Do this stuff first, all at once
         getOauthConfigs()
-    ]);
+    ])
+    .then(() => { // Then do this stuff
+        setInitialOauthTarget();
+    })
 }
 
 function startReact(){

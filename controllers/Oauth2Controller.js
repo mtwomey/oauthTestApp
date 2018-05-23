@@ -2,9 +2,8 @@ const   config            = require('config'),
         axios             = require('axios'),
         helper            = require('../common/helper');
 
-let oauthTarget = config.oauthTarget;
-
 function callback(req, res) {
+    let oauthTarget = config.get('oauthTargets')[req.session.oauthTarget];
     let log = (message) => {req.session.logs.push(message);};
     log(`Received callback to: "${req.originalUrl}"`);
     log(`Query details:\n${JSON.stringify(req.query, null, 4)}`);
@@ -36,7 +35,7 @@ function callback(req, res) {
                 res.send('Done');
             })
             .catch(err => {
-                console.req.session.logs.push(err);
+                log(err);
                 res.send(JSON.stringify(err.response.data, null, 2));
             })
     } else {
@@ -54,8 +53,14 @@ function getConfigs(req, res) {
     res.json(Object.keys(config.get('oauthTargets')));
 }
 
+function setOauthTarget(req, res) {
+    req.session.oauthTarget = req.body.oauthTarget;
+    res.sendStatus(200);
+}
+
 module.exports = {
     callback,
     getConfigs,
-    getLoginUrl
+    getLoginUrl,
+    setOauthTarget
 };
