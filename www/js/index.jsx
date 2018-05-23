@@ -1,5 +1,7 @@
 let events = new EventEmitter();
 
+let global = {};
+
 function log (message){
     events.emit('log', message);
 }
@@ -208,9 +210,28 @@ function deleteAllCookies() {
     }
 }
 
-ReactDOM.render(
-    <OauthTest/>,
-    document.getElementById('root')
-);
+function getOauthConfigs(){
+    return axios.get('/oauth2/configs')
+        .then(response => {
+            global.oauthConfigs = response.data;
+        })
+}
 
+function preLoadData(){
+    return Promise.all([
+        getOauthConfigs()
+    ]);
+}
+
+function startReact(){
+    preLoadData()
+        .then(() => {
+            ReactDOM.render(
+                <OauthTest/>,
+                document.getElementById('root')
+            );
+        });
+}
+
+startReact();
 
