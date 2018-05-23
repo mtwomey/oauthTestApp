@@ -1,10 +1,10 @@
 const   crypto            = require('crypto'),
         config            = require('config');
 
-let oauthTarget = config.get('oauthTarget');
-
 function getLoginUrl(req){
     req.session.oauthStateValue = generateStateValue();
+
+    let oauthTarget = config.get('oauthTargets')[req.params.oauthTarget];
 
     return `${oauthTarget.oauthEndpoint + oauthTarget.authorizePath}?` +
            `audience=${oauthTarget.audience}&` +

@@ -46,11 +46,16 @@ function callback(req, res) {
     }
 }
 
+function getLoginUrl(req, res){
+    res.send(helper.getLoginUrl(req));
+}
+
 function getConfigs(req, res) {
     res.json(Object.keys(config.get('oauthTargets')));
 }
 
 module.exports = {
     callback,
-    getConfigs
+    getConfigs,
+    getLoginUrl
 };

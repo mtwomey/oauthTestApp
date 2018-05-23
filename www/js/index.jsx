@@ -31,7 +31,7 @@ class LoginButton extends React.Component {
     handleClick() {
         log('Getting login URL from the server (which also generates and saves an oauth STATE on the server)');
         this.state.win = window.open('', '_blank', 'height=500,width=500'); // Opening a blank window first to be redirected in the async - this avoids pop-up blocking
-        axios.get('/loginUrl')
+        axios.get(`/loginUrl/${global.oauthTarget}`)
             .then(result => {
                 log(`Opening a new window to "${result.data}"`);
                 this.state.win.location.replace(result.data); // Redirecting the window to auth0
@@ -175,14 +175,24 @@ class OauthTargetSelector extends React.Component {
         this.state = {
 
         };
+
+        global.oauthTarget = global.oauthTargets[0];
+
+        this.handleChange = this.handleChange.bind(this);
+    }
+
+    handleChange(event){
+        global.oauthTarget = event.target.value;
     }
 
     render() {
+        let configOptions = global.oauthTargets.map((config, i) => {
+            return <option key={i} value={config}>{config}</option>
+        });
+
         return (
-            <select>
-                <option value={1}>Option 1</option>
-                <option value={2}>Option 2</option>
-                <option value={3}>Option 3</option>
+            <select onChange={this.handleChange}>
+                {configOptions}
             </select>
         )
     }
@@ -213,7 +223,7 @@ function deleteAllCookies() {
 function getOauthConfigs(){
     return axios.get('/oauth2/configs')
         .then(response => {
-            global.oauthConfigs = response.data;
+            global.oauthTargets = response.data;
         })
 }
 

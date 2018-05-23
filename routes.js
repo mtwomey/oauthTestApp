@@ -8,7 +8,7 @@ router.get('/logs', controllers.LogsController.getAll);
 
 router.get('/signals', controllers.SignalsController.getAll);
 
-router.get('/loginUrl', controllers.UtilController.getLoginUrl);
+router.get('/loginUrl/:oauthTarget', controllers.Oauth2Controller.getLoginUrl);
 
 router.get('/', (req, res) => {res.sendFile(__dirname + '/www/index.html');});
 

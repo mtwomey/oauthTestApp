@@ -9,7 +9,7 @@ module.exports = {
             clientId:                    'C7q8jpZfTtRRDc4n3os9lhbweec6Odlo',
             redirectUri:                 process.env.REDIRECT_URI,
             state:                       '123',
-            clientSecret:                process.env.CLIENT_SECRET
+            clientSecret:                process.env.CLIENT_SECRET_TC_SIMLPE
         },
         'test-cresidtSuisse': {
             oauthEndpoint:               'https://topcoder-dev.auth0.com',
@@ -20,11 +20,9 @@ module.exports = {
             clientId:                    'JoWA7Y7acACM6df3ELrwJC0DmPBg1pJG',
             redirectUri:                 process.env.REDIRECT_URI,
             state:                       '123',
-            clientSecret:                process.env.CLIENT_SECRET
+            clientSecret:                process.env.CLIENT_SECRET_TEST_CREDITSUISSE
         }
     },
-    get oauthTarget() {
-        return this.oauthTargets[process.env.OAUTH_TARGET]
-    },
+
     wwwDirectory: 'www'
 };
