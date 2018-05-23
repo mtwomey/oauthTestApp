@@ -46,6 +46,11 @@ function callback(req, res) {
     }
 }
 
+function getConfigs(req, res) {
+    res.json(Object.keys(config.get('oauthTargets')));
+}
+
 module.exports = {
-    callback
+    callback,
+    getConfigs
 };
