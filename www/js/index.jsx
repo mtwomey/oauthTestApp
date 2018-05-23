@@ -28,10 +28,11 @@ class LoginButton extends React.Component {
 
     handleClick() {
         log('Getting login URL from the server (which also generates and saves an oauth STATE on the server)');
+        this.state.win = window.open('', '_blank', 'height=500,width=500'); // Opening a blank window first to be redirected in the async - this avoids pop-up blocking
         axios.get('/loginUrl')
             .then(result => {
                 log(`Opening a new window to "${result.data}"`);
-                this.state.win = window.open(result.data, '_blank', 'height=500,width=500');
+                this.state.win.location.replace(result.data); // Redirecting the window to auth0
             });
     }
 
