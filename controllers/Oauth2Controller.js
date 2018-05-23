@@ -1,6 +1,7 @@
 const   config            = require('config'),
         axios             = require('axios'),
-        helper            = require('../common/helper');
+        helper            = require('../common/helper'),
+        CircularJSON      = require('circular-json');
 
 function callback(req, res) {
     let oauthTarget = config.get('oauthTargets')[req.session.oauthTarget];
@@ -35,8 +36,9 @@ function callback(req, res) {
                 res.send('Done');
             })
             .catch(err => {
-                log(err);
-                res.send(JSON.stringify(err.response.data, null, 2));
+                let data = CircularJSON.stringify(err.response.data, null, 2);
+                log(data);
+                res.send(data);
             })
     } else {
         log('State values don\'t match!!!');
