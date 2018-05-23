@@ -6,7 +6,15 @@ function getLoginUrl(req){
 
     let oauthTarget = config.get('oauthTargets')[req.params.oauthTarget];
 
-    return `${oauthTarget.oauthEndpoint + oauthTarget.authorizePath}?` +
+    let url = `${oauthTarget.oauthEndpoint + oauthTarget.authorizePath}`;
+
+    if (url.indexOf('?') === -1) { // Start parameters (add a ?) if there are none so far
+        url = `${url}?`;
+    } else {
+        url = `${url}&`;
+    }
+
+    return `${url}` +
            `audience=${oauthTarget.audience}&` +
            `scope=${oauthTarget.scope}&` +
            `response_type=code&` +

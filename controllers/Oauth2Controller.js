@@ -54,6 +54,7 @@ function getConfigs(req, res) {
 }
 
 function setOauthTarget(req, res) {
+    if (!req.session.logs) {req.session.logs = [];} // Fix this later, this shouldn't be needed here...
     let log = (message) => {req.session.logs.push({timestamp: new Date().toLocaleString(), message: message});};
     log(`Changing target oauth to ${req.body.oauthTarget}`);
     req.session.oauthTarget = req.body.oauthTarget;

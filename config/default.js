@@ -13,7 +13,7 @@ module.exports = {
         },
         'test-creditSuisse': {
             oauthEndpoint:               'https://topcoder-dev.auth0.com',
-            authorizePath:               '/authorize', // auth0 default
+            authorizePath:               '/authorize?source=test-cs', // auth0 default
             tokenPath:                   '/oauth/token', // auth0 default
             audience:                    'https://api.topcoder.com/',
             scope:                       'openid profile email offline_access',
