@@ -18,6 +18,13 @@ app.use(session({
     cookie: { maxAge: 60000, httpOnly: false } // Probably want secure: true in production (will only send the cookie back with https connections)
 }));
 
+// Make sure logs and signals array is always there
+app.use((req, res, next) => {
+    if (!req.session.logs) {req.session.logs = [];}
+    if (!req.session.signals) {req.session.signals = [];}
+    next();
+});
+
 // Debug session IDs
 // app.use((req, res, next) => {
 //     console.log(req.session.id);
