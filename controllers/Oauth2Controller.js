@@ -41,7 +41,7 @@ function callback(req, res) {
     } else {
         log('State values don\'t match!!!');
         req.session.signals.push('CloseOauthWindow');
-        res.send('Error: 10');
+        res.json(req.query);
     }
 }
 
