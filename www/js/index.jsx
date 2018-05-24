@@ -6,81 +6,70 @@ function log (message){
     events.emit('log', {timestamp: new Date().toLocaleString(), source: 'CLIENT', message: message});
 }
 
+function getLogs() {
+    return axios.get('/logs')
+        .then(result => {
+            if (result.data.length > 0) {
+                result.data.forEach(logEntry => {
+                    events.emit('log', logEntry);
+                });
+            }
+        });
+}
+
+function getSignals() {
+    return axios.get('/signals')
+        .then(result => {
+            if (result.data.length > 0) {
+                result.data.forEach(signal => {
+                    events.emit(signal);
+                })
+            }
+        });
+}
+
 class Poller {
 
     constructor(){
         this.pollingOn = false;
-        this.pollingStartTime = 0;
         this.pollingEndTime = 0;
-        this.pollingDuration = 0;
+        this.interval = null;
+        this.watcher = null;
     }
 
     getRemainingTime(){
         return this.pollingEndTime - new Date().getTime();
     }
 
-    startLogsPolling(pollingDuration, pollingFrequency){
-        let interval = setInterval(() => {
-            axios.get('/logs')
-                .then(result => {
-                    if (result.data.length > 0) {
-                        result.data.forEach(logEntry => {
-                            events.emit('log', logEntry);
-                        });
-                    }
-                });
-        }, pollingFrequency);
-        setTimeout(() => {
-            this.stopPolling(interval);
-        }, pollingDuration);
-    }
-
-    startSignalsPolling(pollingDuration, pollingFrequency) {
-        let intervalSignals = setInterval(() => {
-            axios.get('/signals')
-                .then(result => {
-                    if (result.data.length > 0) {
-                        result.data.forEach(signal => {
-                            events.emit(signal);
-                        })
-                    }
-                });
-
-        }, pollingFrequency);
-        setTimeout(() => {
-            clearInterval(intervalSignals);
-            this.pollingOn = false;
-        }, pollingDuration);
-    }
-
-    stopPolling(interval){
-        clearInterval(interval);
-        this.pollingOn = false;
-    }
-
     startPolling(duration, frequency) {
-        if (this.pollingOn) {
+        if (this.pollingOn) { // If the poller is already running, just extend the time if necessary
+            let extendedTime = duration - this.getRemainingTime();
+            if (extendedTime > 0) {
+                this.pollingEndTime = this.pollingEndTime + extendedTime;
+            }
+        } else {
+            this.pollingOn = true;
+            this.pollingEndTime = new Date().getTime() + duration;
 
+            let pollingFrequency = frequency || 1000;
+
+            this.interval = setInterval(() => {
+                getLogs();
+                getSignals();
+            }, pollingFrequency);
+
+            this.watcher = setInterval(() => { // Stop all polling once the endTime is reached
+                if (new Date().getTime() > this.pollingEndTime) {
+                    clearInterval(this.interval);
+                    clearInterval(this.watcher);
+                    this.pollingOn = false;
+                }
+            }, 1000);
         }
-
-        this.pollingStartTime = new Date().getTime();
-        this.pollingEndTime = this.pollingStartTime + duration;
-        this.pollingDuration = this.pollingEndTime - this.pollingStartTime;
-        this.pollingOn = true;
-
-        let pollingFrequency = frequency || 1000;
-        let pollingDuration = duration;
-
-        this.startLogsPolling(pollingDuration, pollingFrequency);
-        this.startSignalsPolling(pollingDuration, pollingFrequency);
     }
-
 }
 
 let poller = new Poller();
-
-
-
 
 class LoginButton extends React.Component {
     constructor(props) {
