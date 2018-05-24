@@ -3,11 +3,22 @@ let events = new EventEmitter();
 let global = {};
 
 function log (message){
-    events.emit('log', message);
+    events.emit('log', {timestamp: new Date().toLocaleString(), source: 'CLIENT', message: message});
 }
 
-setInterval(() => {
-    axios.get('/signals')
+function getLogs() {
+    return axios.get('/logs')
+        .then(result => {
+            if (result.data.length > 0) {
+                result.data.forEach(logEntry => {
+                    events.emit('log', logEntry);
+                });
+            }
+        });
+}
+
+function getSignals() {
+    return axios.get('/signals')
         .then(result => {
             if (result.data.length > 0) {
                 result.data.forEach(signal => {
@@ -15,7 +26,50 @@ setInterval(() => {
                 })
             }
         });
-}, 1000);
+}
+
+class Poller {
+
+    constructor(){
+        this.pollingOn = false;
+        this.pollingEndTime = 0;
+        this.interval = null;
+        this.watcher = null;
+    }
+
+    getRemainingTime(){
+        return this.pollingEndTime - new Date().getTime();
+    }
+
+    startPolling(duration, frequency) {
+        if (this.pollingOn) { // If the poller is already running, just extend the time if necessary
+            let extendedTime = duration - this.getRemainingTime();
+            if (extendedTime > 0) {
+                this.pollingEndTime = this.pollingEndTime + extendedTime;
+            }
+        } else {
+            this.pollingOn = true;
+            this.pollingEndTime = new Date().getTime() + duration;
+
+            let pollingFrequency = frequency || 1000;
+
+            this.interval = setInterval(() => {
+                getLogs();
+                getSignals();
+            }, pollingFrequency);
+
+            this.watcher = setInterval(() => { // Stop all polling once the endTime is reached
+                if (new Date().getTime() > this.pollingEndTime) {
+                    clearInterval(this.interval);
+                    clearInterval(this.watcher);
+                    this.pollingOn = false;
+                }
+            }, 1000);
+        }
+    }
+}
+
+let poller = new Poller();
 
 class LoginButton extends React.Component {
     constructor(props) {
@@ -29,6 +83,12 @@ class LoginButton extends React.Component {
     }
 
     handleClick() {
+
+        // Start polling
+        poller.startPolling(120000);
+
+        axios.put('/oauth2/target', {oauthTarget: global.oauthTarget}); // Make sure the target is there
+
         log('Getting login URL from the server (which also generates and saves an oauth STATE on the server)');
         this.state.win = window.open('', '_blank', 'height=500,width=500'); // Opening a blank window first to be redirected in the async - this avoids pop-up blocking
         axios.get(`/loginUrl/${global.oauthTarget}`)
@@ -82,26 +142,17 @@ class LogWindow extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            contents: [],
+            logEntries: [],
             logLineId: 0
         };
 
-        events.on('log', messageText => {
-            this.addlogs('CLIENT', [{timestamp: new Date().toLocaleString(), message: messageText}]);
+        events.on('log', logEntry => {
+            this.addLog(logEntry);
         });
 
         events.on('clearLog', () => {
-            this.setState({contents: []});
+            this.setState({logEntries: []});
         });
-
-        setInterval(() => {
-            axios.get('/logs')
-                .then(result => {
-                    if (result.data.length > 0) {
-                        this.addlogs('SERVER', result.data);
-                    }
-                });
-        }, 1000);
     }
 
 
@@ -109,12 +160,10 @@ class LogWindow extends React.Component {
         return this.state.logLineId++;
     }
 
-    addlogs(source, logs) {
-        let newContents = this.state.contents;
-        newContents = newContents.concat(logs.map(logEntry => {
-            return {id: this.getLogLineId(), source: source, timestamp: logEntry.timestamp, message: logEntry.message};
-        }));
-        this.setState({contents: newContents});
+    addLog(logEntry) {
+        let newContents = this.state.logEntries;
+        newContents.push(Object.assign({id: this.getLogLineId()}, logEntry));
+        this.setState({logEntries: newContents});
     }
 
     scrollToBottom = () => {
@@ -157,8 +206,8 @@ class LogWindow extends React.Component {
             padding: '0 0 5px 0'
         };
 
-        let logMessages = this.state.contents.map(message => {
-            return <li key={message.id} style={styleListItem}><span style={styleTimestampTag}>[{message.timestamp}]</span> <span style={styleSourceTag}>[{message.source}]</span> {message.message}</li>
+        let logMessages = this.state.logEntries.map(logEntry => {
+            return <li key={logEntry.id} style={styleListItem}><span style={styleTimestampTag}>[{logEntry.timestamp}]</span> <span style={styleSourceTag}>[{logEntry.source}]</span> {logEntry.message}</li>
         });
 
         return (
