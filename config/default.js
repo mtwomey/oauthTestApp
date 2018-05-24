@@ -2,7 +2,7 @@ module.exports = {
     oauthTargets: {
         'tc-simple-tenant': {
             oauthEndpoint:               'https://tc-simple-tenant.auth0.com',
-            authorizePath:               '/authorize', // auth0 default
+            authorizePath:               '/authorize?source=simple-tc-01',
             tokenPath:                   '/oauth/token', // auth0 default
             audience:                    'https://simple.topcoder.com',
             scope:                       'openid profile email offline_access',
@@ -13,7 +13,7 @@ module.exports = {
         },
         'test-creditSuisse': {
             oauthEndpoint:               'https://topcoder-dev.auth0.com',
-            authorizePath:               '/authorize?source=test-cs', // auth0 default
+            authorizePath:               '/authorize?source=test-cs',
             tokenPath:                   '/oauth/token', // auth0 default
             audience:                    'https://api.topcoder.com/',
             scope:                       'openid profile email offline_access',
