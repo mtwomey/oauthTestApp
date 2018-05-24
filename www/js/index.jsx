@@ -175,8 +175,12 @@ class LogWindow extends React.Component {
     }
 
     render() {
-        let styleSourceTag = {
+        let styleSourceTag01 = {
             color: '#4CAF50'
+        };
+
+        let styleSourceTag02 = {
+            color: '#978cea'
         };
 
         let styleTimestampTag = {
@@ -207,6 +211,13 @@ class LogWindow extends React.Component {
         };
 
         let logMessages = this.state.logEntries.map(logEntry => {
+            let styleSourceTag;
+            if (logEntry.source === 'CLIENT') {
+                styleSourceTag = styleSourceTag01;
+            }
+            if (logEntry.source === 'SERVER') {
+                styleSourceTag = styleSourceTag02;
+            }
             return <li key={logEntry.id} style={styleListItem}><span style={styleTimestampTag}>[{logEntry.timestamp}]</span> <span style={styleSourceTag}>[{logEntry.source}]</span> {logEntry.message}</li>
         });
 
@@ -237,6 +248,7 @@ class OauthTargetSelector extends React.Component {
 
     handleChange(event){
         global.oauthTarget = event.target.value;
+        poller.startPolling(5000);
         axios.put('/oauth2/target', {oauthTarget: global.oauthTarget});
         log(`Changing target oauth to ${global.oauthTarget}`);
     }
@@ -310,6 +322,7 @@ function startReact(){
                 <OauthTest/>,
                 document.getElementById('root')
             );
+            poller.startPolling(10000);
         });
 }
 
