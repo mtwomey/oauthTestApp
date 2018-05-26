@@ -3,7 +3,7 @@ let events = new EventEmitter();
 let global = {};
 
 function log (message){
-    events.emit('log', {timestamp: new Date().toLocaleString(), source: 'CLIENT', message: message});
+    events.emit('log', {timestamp: new Date().getTime(), source: 'CLIENT', message: message});
 }
 
 function getLogs() {
@@ -26,6 +26,14 @@ function getSignals() {
                 })
             }
         });
+}
+
+function waitForSignal(signal){
+    return new Promise((resolve, reject) => {
+        events.once(signal, () => {
+            resolve();
+        })
+    });
 }
 
 class Poller {
@@ -87,14 +95,15 @@ class LoginButton extends React.Component {
         // Start polling
         poller.startPolling(120000);
 
-        axios.put('/oauth2/target', {oauthTarget: global.oauthTarget}); // Make sure the target is there
-
-        log('Getting login URL from the server (which also generates and saves an oauth STATE on the server)');
-        this.state.win = window.open('', '_blank', 'height=500,width=500'); // Opening a blank window first to be redirected in the async - this avoids pop-up blocking
-        axios.get(`/loginUrl/${global.oauthTarget}`)
-            .then(result => {
-                log(`Opening a new window to "${result.data}"`);
-                this.state.win.location.replace(result.data); // Redirecting the window to auth0
+        this.state.win = window.open('', '_blank', 'height=500,width=500'); // Opening a blank window first to be redirected in the async - this avoids pop-up blocking (not doing it inside an async callback
+        setOauthTarget() // Make sure the target is there
+            .then(() => {
+                log('Getting login URL from the server (which also generates and saves an oauth STATE on the server)');
+                axios.get(`/loginUrl/${global.oauthTarget}`)
+                    .then((result) => {
+                        log(`Opening a new window to "${result.data}"`);
+                        this.state.win.location.replace(result.data); // Redirecting the window to auth0
+                    });
             });
     }
 
@@ -119,7 +128,8 @@ class ClearButton extends React.Component {
         events.emit('clearLog');
         axios.delete('/session');
         deleteAllCookies();
-        axios.put('/oauth2/target', {oauthTarget: global.oauthTarget}); // This has to come after deleteAllCookies
+        setOauthTarget(); // This has to come after deleteAllCookies
+        poller.startPolling(5000);
     }
 
     render() {
@@ -143,7 +153,7 @@ class LogWindow extends React.Component {
         super(props);
         this.state = {
             logEntries: [],
-            logLineId: 0
+            logLineId: 1
         };
 
         events.on('log', logEntry => {
@@ -161,9 +171,12 @@ class LogWindow extends React.Component {
     }
 
     addLog(logEntry) {
-        let newContents = this.state.logEntries;
-        newContents.push(Object.assign({id: this.getLogLineId()}, logEntry));
-        this.setState({logEntries: newContents});
+        let idLogEntry = Object.assign({id: this.getLogLineId()}, logEntry);
+        this.setState((prevState) => {
+            let logEntries = prevState.logEntries;
+            logEntries.push(idLogEntry);
+            return ({logEntries: logEntries});
+        })
     }
 
     scrollToBottom = () => {
@@ -185,6 +198,10 @@ class LogWindow extends React.Component {
 
         let styleTimestampTag = {
             color: '#00bcd4'
+        };
+
+        let styleIdTag = {
+            color: '#d4c700'
         };
 
         let styleDiv = {
@@ -210,7 +227,8 @@ class LogWindow extends React.Component {
             padding: '0 0 5px 0'
         };
 
-        let logMessages = this.state.logEntries.map(logEntry => {
+        this.state.logEntries.sort((a, b) => a.timestamp - b.timestamp);
+        let logMessages = this.state.logEntries.map((logEntry, index) => {
             let styleSourceTag;
             if (logEntry.source === 'CLIENT') {
                 styleSourceTag = styleSourceTag01;
@@ -218,7 +236,7 @@ class LogWindow extends React.Component {
             if (logEntry.source === 'SERVER') {
                 styleSourceTag = styleSourceTag02;
             }
-            return <li key={logEntry.id} style={styleListItem}><span style={styleTimestampTag}>[{logEntry.timestamp}]</span> <span style={styleSourceTag}>[{logEntry.source}]</span> {logEntry.message}</li>
+            return <li key={logEntry.id} style={styleListItem}><span style={styleIdTag}>[{('00' + (index +1)).slice(-3)}]</span> <span style={styleTimestampTag}>[{new Date(logEntry.timestamp).toLocaleString()}]</span> <span style={styleSourceTag}>[{logEntry.source}]</span> {logEntry.message}</li>
         });
 
         return (
@@ -249,8 +267,7 @@ class OauthTargetSelector extends React.Component {
     handleChange(event){
         global.oauthTarget = event.target.value;
         poller.startPolling(5000);
-        axios.put('/oauth2/target', {oauthTarget: global.oauthTarget});
-        log(`Changing target oauth to ${global.oauthTarget}`);
+        setOauthTarget();
     }
 
     render() {
@@ -285,12 +302,12 @@ class OauthTest extends React.Component {
 }
 
 function deleteAllCookies() {
-    var cookies = document.cookie.split(";");
+    let cookies = document.cookie.split(";");
 
-    for (var i = 0; i < cookies.length; i++) {
-        var cookie = cookies[i];
-        var eqPos = cookie.indexOf("=");
-        var name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+    for (let i = 0; i < cookies.length; i++) {
+        let cookie = cookies[i];
+        let eqPos = cookie.indexOf("=");
+        let name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
         document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT";
     }
 }
@@ -302,8 +319,10 @@ function getOauthConfigs(){
         })
 }
 
-function setInitialOauthTarget(){
-    return axios.put('/oauth2/target', {oauthTarget: global.oauthTargets[0]})
+function setOauthTarget(oauthTarget){
+    let target = oauthTarget || global.oauthTarget;
+    log(`Requesting target change to ${target}`);
+    return axios.put('/oauth2/target', {oauthTarget: target});
 }
 
 function preLoadData(){
@@ -311,7 +330,7 @@ function preLoadData(){
         getOauthConfigs()
     ])
     .then(() => { // Then do this stuff
-        setInitialOauthTarget();
+        setOauthTarget(global.oauthTargets[0]);
     })
 }
 
@@ -326,5 +345,9 @@ function startReact(){
         });
 }
 
+waitForSignal('CloseOauthWindow')
+    .then(() => {
+        console.log('I got the signal');
+    });
 startReact();
 
