@@ -6,7 +6,7 @@ jobs:
     steps:
       - run:
           name: Pull down Master Script 2
-          command: git clone --branch master https://github.com/topcoder-platform/tc-deploy-scripts ../buildscript$
+          command: git clone --branch master https://github.com/topcoder-platform/tc-deploy-scripts ../buildscript
       - checkout
       - run:
           name: Run NPM install
