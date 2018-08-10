@@ -21,7 +21,7 @@ workflows:
   build:
     jobs:
       - "build-dev":
-        filters:
-          branches:
-            only:
-              - dev
+          filters:
+            branches:
+              only:
+                - dev
