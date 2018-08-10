@@ -9,7 +9,7 @@ function callback(req, res) {
     log(`Received callback to: "${req.originalUrl}"`);
     log(`Query details:\n${JSON.stringify(req.query, null, 4)}`);
     log(`Comparing the state values: "${req.session.oauthStateValue}" = "${req.query.state}" ?`);
-    if (req.session.oauthStateValue === req.query.state) {
+    if ((req.session.oauthStateValue && req.query.state) && (req.session.oauthStateValue === req.query.state)) {
         log('State values are equal');
         log('Exchanging the one-time code for a JWT token');
         let postBody = {

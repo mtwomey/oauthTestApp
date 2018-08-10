@@ -17,7 +17,7 @@ function getLoginUrl(req){
     return `${url}` +
            `audience=${oauthTarget.audience}&` +
            `scope=${oauthTarget.scope}&` +
-           `response_type=code&` +
+           `response_type=${oauthTarget.responseType}&` +
            `client_id=${oauthTarget.clientId}&` +
            `redirect_uri=${oauthTarget.redirectUri}&` +
            `state=${req.session.oauthStateValue}`;

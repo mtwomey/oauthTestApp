@@ -79,16 +79,42 @@ class Poller {
 
 let poller = new Poller();
 
-class LoginButton extends React.Component {
+class AccountsLoginButton extends React.Component {
     constructor(props) {
         super(props);
         this.state = {};
         this.handleClick = this.handleClick.bind(this);
-
-        events.on('CloseOauthWindow', () => {
-            this.state.win.close();
-        });
     }
+
+    handleClick() {
+
+    }
+
+    render() {
+        let styleButton = {
+            margin: '0 10px 10px 0',
+            fontSize: '1em',
+            backgroundColor: '#b83c48',
+            color: 'white',
+            borderRadius: '5px'
+        };
+
+        return (
+            <button onClick={this.handleClick} style={styleButton}>Accounts Login</button>
+        );
+    }
+}
+
+class LoginButton extends React.Component {
+        constructor(props) {
+            super(props);
+            this.state = {};
+            this.handleClick = this.handleClick.bind(this);
+
+            events.on('CloseOauthWindow', () => {
+                this.state.win.close();
+            });
+        }
 
     handleClick() {
 
@@ -99,8 +125,10 @@ class LoginButton extends React.Component {
         setOauthTarget() // Make sure the target is there
             .then(() => {
                 log('Getting login URL from the server (which also generates and saves an oauth STATE on the server)');
-                axios.get(`/loginUrl/${global.oauthTarget}`)
+                getLoginUrl()
                     .then((result) => {
+                        let query = (result.data.split('?')[1]).split('&');
+                        log(`URL details:\n${JSON.stringify(query, null, 2)}`);
                         log(`Opening a new window to "${result.data}"`);
                         this.state.win.location.replace(result.data); // Redirecting the window to auth0
                     });
@@ -294,7 +322,7 @@ class OauthTest extends React.Component {
     render() {
         return (
             <div>
-                <LoginButton/><ClearButton/><OauthTargetSelector/>
+                <LoginButton/><ClearButton/><OauthTargetSelector/><AccountsLoginButton/>
                 <LogWindow/>
             </div>
         );
@@ -317,6 +345,10 @@ function getOauthConfigs(){
         .then(response => {
             global.oauthTargets = response.data;
         })
+}
+
+function getLoginUrl(){
+    return axios.get(`/loginUrl/${global.oauthTarget}`);
 }
 
 function setOauthTarget(oauthTarget){
