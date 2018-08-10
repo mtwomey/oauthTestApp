@@ -2,7 +2,7 @@ version: 2
 jobs:
   "build-dev":
     docker:
-      - image: docker:18.06.0-ce
+      - image: circleci/node:latest
     steps:
       - checkout
       - run:
