@@ -11,8 +11,8 @@ jobs:
       - run:
           name: Run NPM install
           command: npm i
-      - install_tools:
-          name: Install install_tools
+      - run:
+          name: Install tools
           command: |
             sudo apt-get update; sudo apt-get install python-dev -y
             sudo curl https://bootstrap.pypa.io/get-pip.py -o -|sudo python
