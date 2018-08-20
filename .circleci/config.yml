@@ -17,7 +17,7 @@ jobs:
             sudo apt-get update; sudo apt-get install python-dev -y
             sudo curl https://bootstrap.pypa.io/get-pip.py -o -|sudo python
             pip install awscli --upgrade --user
-            export PATH=$PATH:/home/circleci/.local/bin
+            echo export PATH=\$PATH:/home/circleci/.local/bin >>~/.bashrc
       - deploy:
           name: Deploy application
           command: |
