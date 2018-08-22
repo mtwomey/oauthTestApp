@@ -9,18 +9,18 @@ jobs:
           command: git clone --branch master https://github.com/topcoder-platform/tc-deploy-scripts ../buildscript
       - checkout
       - run:
-          name: Run NPM install
-          command: npm i
-      - run:
           name: Install tools
           command: |
             sudo apt-get update; sudo apt-get install python-dev -y
             sudo curl https://bootstrap.pypa.io/get-pip.py -o -|sudo python
             pip install awscli --upgrade --user
-            echo export PATH=\$PATH:/home/circleci/.local/bin >>~/.bashrc
+      - run:
+          name: Build Docker image
+          command: docker build .
       - deploy:
           name: Deploy application
           command: |
+            echo 'export PATH=$PATH:/home/circleci/.local/bin >> $BASH_ENV
             cp ./../buildscript/master_deply_v4.2.sh .
             ./master_deply_v4.2.sh -d ECS -e DEV -t $CIRCLE_SHA1 -s oauth_test_app
 workflows:
