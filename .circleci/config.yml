@@ -14,6 +14,7 @@ jobs:
             sudo apt-get update; sudo apt-get install python-dev -y
             sudo curl https://bootstrap.pypa.io/get-pip.py -o -|sudo python
             pip install awscli --upgrade --user
+      - setup_remote_docker
       - run:
           name: Build Docker image
           command: docker build .
