@@ -17,7 +17,7 @@ jobs:
       - setup_remote_docker
       - run:
           name: Build Docker image
-          command: docker build .
+          command: ./buildECSDockerImage.sh DEV
       - deploy:
           name: Deploy application
           command: |
