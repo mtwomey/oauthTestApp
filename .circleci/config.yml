@@ -21,7 +21,7 @@ jobs:
       - deploy:
           name: Deploy application
           command: |
-            echo 'export PATH=$PATH:/home/circleci/.local/bin >> $BASH_ENV
+            echo 'export PATH=$PATH:/home/circleci/.local/bin' >> $BASH_ENV
             cp ./../buildscript/master_deply_v4.2.sh .
             ./master_deply_v4.2.sh -d ECS -e DEV -t $CIRCLE_SHA1 -s oauth_test_app
 workflows:
