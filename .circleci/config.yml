@@ -10,8 +10,8 @@ jobs:
       - run:
           name: Add env vars
           command: |
-            echo export TEST_VAR_01="This is VAR1" >> "$BASH_ENV"
-            echo export TEST_VAR_02="This is VAR2" >> "$BASH_ENV"
+            echo export TEST_VAR_01=\"This is VAR1\" >> "$BASH_ENV"
+            echo export TEST_VAR_02=\"This is VAR2\" >> "$BASH_ENV"
       - checkout
       - run:
           name: Install tools
