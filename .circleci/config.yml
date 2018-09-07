@@ -7,6 +7,11 @@ jobs:
       - run:
           name: Pull down Master Script 2
           command: git clone --branch master https://github.com/topcoder-platform/tc-deploy-scripts ../buildscript
+      - run:
+          name: Add env vars
+          command: |
+            echo export TEST_VAR_01='This is VAR1' >> "$BASH_ENV"
+            echo export TEST_VAR_02='This is VAR2' >> "$BASH_ENV"
       - checkout
       - run:
           name: Install tools
@@ -15,6 +20,11 @@ jobs:
             sudo curl https://bootstrap.pypa.io/get-pip.py -o -|sudo python
             pip install awscli --upgrade --user
       - setup_remote_docker
+      - run:
+          name: Check env vars
+          command: |
+            echo $TEST_VAR_01
+            echo $TEST_VAR_02
       - run:
           name: Build Docker image
           command: ./buildECSDockerImage.sh DEV
