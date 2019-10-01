@@ -9,7 +9,7 @@ module.exports = {
             scope:                       'openid profile email offline_access',
             clientId:                    'C7q8jpZfTtRRDc4n3os9lhbweec6Odlo',
             redirectUri:                 process.env.REDIRECT_URI,
-            clientSecret:                process.env.CLIENT_SECRET_TC_SIMLPE
+            clientSecret:                process.env.CLIENT_SECRET_TC_SIMPLE
         },
         'test-creditSuisse': {
             oauthEndpoint:               'https://topcoder-dev.auth0.com',
