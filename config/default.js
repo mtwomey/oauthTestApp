@@ -49,8 +49,8 @@ module.exports = {
             authorizePath:               '/authorize?source=tc-simple-application',
             tokenPath:                   '/oauth/token', // auth0 default
             audience:                    'https://simple.topcoder.com',
-            responseType:                'token',
-            scope:                       'openid profile email offline_access',
+            responseType:                'code',
+            scope:                       'openid profile',
             clientId:                    'C7q8jpZfTtRRDc4n3os9lhbweec6Odlo',
             redirectUri:                 process.env.REDIRECT_URI,
             clientSecret:                process.env['CLIENT_SECRET_SAML-TEST-IDP']
