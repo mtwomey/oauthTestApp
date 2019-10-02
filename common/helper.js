@@ -14,13 +14,19 @@ function getLoginUrl(req){
         url = `${url}&`;
     }
 
-    return `${url}` +
-           `audience=${oauthTarget.audience}&` +
-           `scope=${oauthTarget.scope}&` +
-           `response_type=${oauthTarget.responseType}&` +
-           `client_id=${oauthTarget.clientId}&` +
-           `redirect_uri=${oauthTarget.redirectUri}&` +
-           `state=${req.session.oauthStateValue}`;
+    url = `${url}` +
+        `audience=${oauthTarget.audience}&` +
+        `scope=${oauthTarget.scope}&` +
+        `response_type=${oauthTarget.responseType}&` +
+        `client_id=${oauthTarget.clientId}&` +
+        `redirect_uri=${oauthTarget.redirectUri}&` +
+        `state=${req.session.oauthStateValue}`;
+
+    if (oauthTarget.connection) {
+        url = `${url}&connection=${oauthTarget.connection}`;
+    }
+
+    return url
 }
 
 // Generate nonce for use in oauth2 state parameter
