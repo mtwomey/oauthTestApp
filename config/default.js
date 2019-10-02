@@ -53,7 +53,7 @@ module.exports = {
             scope:                       'openid profile email offline_access',
             clientId:                    'C7q8jpZfTtRRDc4n3os9lhbweec6Odlo',
             redirectUri:                 process.env.REDIRECT_URI,
-            clientSecret:                process.env.CLIENT_SECRET_LOCALSIMPLESAML
+            clientSecret:                process.env.CLIENT_SECRET_SAML-TEST-IDP
         }
     },
 
