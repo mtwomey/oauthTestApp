@@ -19,6 +19,7 @@ function callback(req, res) {
             code: req.query.code,
             redirect_uri: oauthTarget.redirectUri
         };
+        console.log(postBody);
         axios.post(`${oauthTarget.oauthEndpoint + oauthTarget.tokenPath}`, postBody)
             .then(response => {
                 if (response.data.access_token){
